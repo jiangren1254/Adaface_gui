@@ -30,8 +30,8 @@ pip install torchvision==0.16.0 -f https://mirrors.aliyun.com/pytorch-wheels/cu1
 
 pip install -r requirements.txt
 ```
-#### 2.1 配置环境中遇到的问题
-暂无
+#### 2.1 adaface模型推理测试
+python inference.py
 
 ### 3 运行core_code中的代码
 1. get_face_feature.py 得到.pkl文件
