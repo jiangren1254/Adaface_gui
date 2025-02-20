@@ -1,5 +1,5 @@
 # AdaFace_gui: 基于AdaFace设计的gui界面
-<img src="assets/界面.png"/>
+<img src="assets/界面.png"  width="450" style="display: block; margin: auto;"/>
 
 ### 1. 去百度网盘下载数据集和预训练模型
 [百度网盘地址]

@@ -14,7 +14,7 @@ import pickle
 
 # TODO: add model
 adaface_models = {
-    "ir_101": "../pretrained_model/adaface_ir101_ms1mv2.ckpt",
+    "ir_101": "./pretrained_model/adaface_ir101_ms1mv2.ckpt",
 }
 
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     model = load_pretrained_model("ir_101").to(0)
     individual_root = "datasets/train"
     features_dic = {}
-    features_file = "face_feature/skk_features.pkl"
+    features_file = "face_feature/star_face_features.pkl"
 
     with torch.no_grad():
         for name in os.listdir(individual_root):
