@@ -14,7 +14,7 @@ import pickle
 
 # TODO: add model
 adaface_models = {
-    "ir_101": "./pretrained_model/adaface_ir101_ms1mv2.ckpt",
+    "ir_101": "./core_code/pretrained_model/adaface_ir101_ms1mv2.ckpt",
 }
 
 
@@ -41,16 +41,16 @@ def to_input(pil_rgb_image):
 if __name__ == "__main__":
 
     model = load_pretrained_model("ir_101").to(0)
-    individual_root = "datasets/train"
+    individual_root = "core_code/datasets/train"
     features_dic = {}
-    features_file = "face_feature/star_face_features.pkl"
+    features_file = "core_code/face_feature/star_face_features.pkl"
 
     with torch.no_grad():
         for name in os.listdir(individual_root):
             features_dic[name] = []
             for fname in sorted(os.listdir(os.path.join(individual_root, name))):
                 path = os.path.join(individual_root, name, fname)
-                aligned_rgb_img = align.get_individual_aligned_face(path)
+                aligned_rgb_img = align.get_aligned_face(path)
                 if aligned_rgb_img == None:
                     continue
                 try:
