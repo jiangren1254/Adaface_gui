@@ -15,15 +15,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
-    QPushButton, QSizePolicy, QStatusBar, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
+    QMainWindow, QProgressBar, QPushButton, QSizePolicy,
+    QStatusBar, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(965, 581)
+        MainWindow.resize(994, 608)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.line_1 = QFrame(self.centralwidget)
@@ -138,14 +138,177 @@ class Ui_MainWindow(object):
 
         self.label_time = QLabel(self.centralwidget)
         self.label_time.setObjectName(u"label_time")
-        self.label_time.setGeometry(QRect(580, 290, 141, 61))
+        self.label_time.setGeometry(QRect(580, 10, 101, 41))
+        self.label_time.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
+" color:rgb(0, 255, 0);\n"
+" font-size: 16px; padding: 10px;\n"
+" qproperty-alignment: AlignCenter;")
+        self.label_bg2 = QLabel(self.centralwidget)
+        self.label_bg2.setObjectName(u"label_bg2")
+        self.label_bg2.setGeometry(QRect(340, 10, 341, 41))
+        self.label_bg2.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
+" color:rgb(0, 255, 0);\n"
+" font-size: 20px; padding: 10px;")
+        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar.setObjectName(u"progressBar")
+        self.progressBar.setGeometry(QRect(830, 200, 118, 23))
+        self.progressBar.setValue(88)
+        self.progressBar.setInvertedAppearance(False)
+        self.progressBar.setTextDirection(QProgressBar.TopToBottom)
+        self.line_2 = QFrame(self.centralwidget)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setGeometry(QRect(690, 0, 20, 581))
+        self.line_2.setFrameShape(QFrame.VLine)
+        self.line_2.setFrameShadow(QFrame.Sunken)
+        self.horizontalLayoutWidget = QWidget(self.centralwidget)
+        self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
+        self.horizontalLayoutWidget.setGeometry(QRect(400, 60, 211, 41))
+        self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_open = QPushButton(self.horizontalLayoutWidget)
+        self.pushButton_open.setObjectName(u"pushButton_open")
+        self.pushButton_open.setMaximumSize(QSize(70, 40))
+        self.pushButton_open.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
+" color:rgb(0, 255, 0);\n"
+" font-size: 16px; padding: 10px;")
+
+        self.horizontalLayout.addWidget(self.pushButton_open)
+
+        self.pushButton_off = QPushButton(self.horizontalLayoutWidget)
+        self.pushButton_off.setObjectName(u"pushButton_off")
+        self.pushButton_off.setMaximumSize(QSize(70, 40))
+        self.pushButton_off.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
+" color:rgb(0, 255, 0);\n"
+" font-size: 16px; padding: 10px;")
+
+        self.horizontalLayout.addWidget(self.pushButton_off)
+
+        self.label_camera = QLabel(self.centralwidget)
+        self.label_camera.setObjectName(u"label_camera")
+        self.label_camera.setGeometry(QRect(360, 110, 311, 221))
+        self.label_camera.setStyleSheet(u"border: 2px solid black;")
+        self.label_recog_result = QLabel(self.centralwidget)
+        self.label_recog_result.setObjectName(u"label_recog_result")
+        self.label_recog_result.setGeometry(QRect(390, 380, 191, 151))
+        self.label_recog_result.setAutoFillBackground(False)
+        self.label_recog_result.setStyleSheet(u"border: 2px solid black;")
+        self.line = QFrame(self.centralwidget)
+        self.line.setObjectName(u"line")
+        self.line.setGeometry(QRect(330, 340, 371, 16))
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+        self.pushButton_open_2 = QPushButton(self.centralwidget)
+        self.pushButton_open_2.setObjectName(u"pushButton_open_2")
+        self.pushButton_open_2.setGeometry(QRect(600, 430, 70, 39))
+        self.pushButton_open_2.setMaximumSize(QSize(70, 40))
+        self.pushButton_open_2.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
+" color:rgb(0, 255, 0);\n"
+" font-size: 16px; padding: 10px;")
+        self.label_recog_result_2 = QLabel(self.centralwidget)
+        self.label_recog_result_2.setObjectName(u"label_recog_result_2")
+        self.label_recog_result_2.setGeometry(QRect(710, 10, 271, 541))
+        self.label_recog_result_2.setAutoFillBackground(False)
+        self.label_recog_result_2.setStyleSheet(u"border: 2px solid black;")
+        self.label = QLabel(self.centralwidget)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(720, 80, 61, 20))
+        self.label.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_name = QLabel(self.centralwidget)
+        self.label_name.setObjectName(u"label_name")
+        self.label_name.setGeometry(QRect(820, 80, 141, 21))
+        self.label_name.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+"    padding: 10px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_name_2 = QLabel(self.centralwidget)
+        self.label_name_2.setObjectName(u"label_name_2")
+        self.label_name_2.setGeometry(QRect(820, 130, 141, 21))
+        self.label_name_2.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+"    padding: 10px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_2 = QLabel(self.centralwidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(720, 130, 91, 20))
+        self.label_2.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_3 = QLabel(self.centralwidget)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setGeometry(QRect(730, 200, 91, 20))
+        self.label_3.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_4 = QLabel(self.centralwidget)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setGeometry(QRect(730, 280, 91, 20))
+        self.label_4.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_name_3 = QLabel(self.centralwidget)
+        self.label_name_3.setObjectName(u"label_name_3")
+        self.label_name_3.setGeometry(QRect(830, 280, 141, 21))
+        self.label_name_3.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+"    padding: 10px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.label_5 = QLabel(self.centralwidget)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setGeometry(QRect(730, 340, 91, 20))
+        self.label_5.setStyleSheet(u"\n"
+"    color: rgb(0, 0, 0);\n"
+"    font-size: 16px;\n"
+" qproperty-alignment: AlignCenter;\n"
+"border: 1px solid black;")
+        self.frame = QFrame(self.centralwidget)
+        self.frame.setObjectName(u"frame")
+        self.frame.setGeometry(QRect(820, 410, 50, 50))
+        self.frame.setMaximumSize(QSize(50, 50))
+        self.frame.setStyleSheet(u"background-color: red; border-radius: 25px; border: 2px solid black;")
+        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Raised)
         MainWindow.setCentralWidget(self.centralwidget)
+        self.label_recog_result_2.raise_()
+        self.label_bg2.raise_()
         self.label_bg1.raise_()
         self.line_1.raise_()
         self.label_title.raise_()
         self.label_version.raise_()
         self.verticalLayoutWidget.raise_()
         self.label_time.raise_()
+        self.progressBar.raise_()
+        self.line_2.raise_()
+        self.horizontalLayoutWidget.raise_()
+        self.label_camera.raise_()
+        self.label_recog_result.raise_()
+        self.line.raise_()
+        self.pushButton_open_2.raise_()
+        self.label.raise_()
+        self.label_name.raise_()
+        self.label_name_2.raise_()
+        self.label_2.raise_()
+        self.label_3.raise_()
+        self.label_4.raise_()
+        self.label_name_3.raise_()
+        self.label_5.raise_()
+        self.frame.raise_()
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
@@ -166,6 +329,22 @@ class Ui_MainWindow(object):
         self.pushButton_record.setText(QCoreApplication.translate("MainWindow", u"\u8bc6\u522b\u8bb0\u5f55", None))
         self.pushButton_about.setText(QCoreApplication.translate("MainWindow", u"\u5173\u4e8e", None))
         self.pushButton_quit.setText(QCoreApplication.translate("MainWindow", u"\u9000\u51fa", None))
-        self.label_time.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.label_time.setText(QCoreApplication.translate("MainWindow", u"real time", None))
+        self.label_bg2.setText(QCoreApplication.translate("MainWindow", u"\u6444\u50cf\u5934", None))
+        self.progressBar.setFormat(QCoreApplication.translate("MainWindow", u"%p%", None))
+        self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"\u6253\u5f00", None))
+        self.pushButton_off.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed", None))
+        self.label_camera.setText("")
+        self.label_recog_result.setText("")
+        self.pushButton_open_2.setText(QCoreApplication.translate("MainWindow", u"\u8bc6\u522b", None))
+        self.label_recog_result_2.setText("")
+        self.label.setText(QCoreApplication.translate("MainWindow", u"\u59d3\u540d:", None))
+        self.label_name.setText("")
+        self.label_name_2.setText("")
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u8eab\u4efd\u8bc1\u53f7:", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u76f8\u4f3c\u5ea6:", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"\u8fdb\u5165\u65f6\u95f4:", None))
+        self.label_name_3.setText("")
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"\u8bc6\u522b\u6307\u793a\u706f:", None))
     # retranslateUi
 

@@ -19,7 +19,7 @@ import torch
 import numpy as np
 import pandas as pd
 
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import QTimer, Qt, QTime
 from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog
 from PySide6.QtGui import QPixmap, QImage
 
@@ -31,20 +31,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
-        self.cap = cv2.VideoCapture(0)
-        if not self.cap.isOpened():
-            print("无法打开摄像头")
-            exit()
+        self.realTime = QTimer(self)
+        self.realTime.timeout.connect(self.update_time)
+        self.realTime.start(1000)
+        self.update_time()
 
-        # # 使用QTimer来代替while循环
-        # self.timer = QTimer()
-        # self.timer.timeout.connect(self.update_frame)
-        # self.timer.start(30)  # 每隔30ms捕获一帧
-        # # 初始化模型
-        # self.detector = face_detector()
-        # self.rootFeatureImg = (
-        #     r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\datasets\train"
-        # )
+    def update_time(self):
+        """更新实时时间"""
+        current_time = QTime.currentTime().toString("HH:mm:ss")
+        self.label_time.setText(current_time)
 
     def update_frame(self):
         ret, frame = self.cap.read()
@@ -124,7 +119,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, event):
         """在窗口关闭时，释放摄像头资源"""
-        self.cap.release()
+        # self.cap.release()
         cv2.destroyAllWindows()
         event.accept()
 
