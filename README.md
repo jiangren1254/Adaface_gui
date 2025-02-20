@@ -41,6 +41,7 @@ tensor([[ 1.0000,  0.7456, -0.0823],
 ```
 ### 3 运行core_code中的代码
 1. get_face_feature.py 得到.pkl文件
+2. face_recognize.py 得到人脸识别结果
 
 ### 5 Minute Video Presentation
 [![IMAGE ALT TEXT](assets/video_thumbnail.png)](https://www.youtube.com/watch?v=NfHzn6epAHM "AdaFace 5 minute video presentation")

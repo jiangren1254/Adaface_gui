@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         for name in os.listdir(individual_root):
+            print(name)
             features_dic[name] = []
             for fname in sorted(os.listdir(os.path.join(individual_root, name))):
                 path = os.path.join(individual_root, name, fname)
