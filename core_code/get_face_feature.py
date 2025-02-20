@@ -3,18 +3,21 @@
     获得一个人脸特征库
 """
 
-import net
 import torch
 import os
+import sys
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # 治表不治里解决方案
+# 获取 core_code 的上级目录路径，并添加到 sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+import net
 from face_alignment import align
 import numpy as np
 import pickle
 
 # TODO: add model
 adaface_models = {
-    "ir_101": "./core_code/pretrained_model/adaface_ir101_ms1mv2.ckpt",
+    "ir_101": "./pretrained_model/adaface_ir101_ms1mv2.ckpt",
 }
 
 
@@ -41,9 +44,9 @@ def to_input(pil_rgb_image):
 if __name__ == "__main__":
 
     model = load_pretrained_model("ir_101").to(0)
-    individual_root = "core_code/datasets/train"
+    individual_root = "datasets/train"
     features_dic = {}
-    features_file = "core_code/face_feature/star_face_features.pkl"
+    features_file = "face_feature_lib/star_face_features.pkl"
 
     with torch.no_grad():
         for name in os.listdir(individual_root):
