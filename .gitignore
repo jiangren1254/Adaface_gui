@@ -9,3 +9,7 @@ validation_ijbs
 *.csv
 result
 scripts/run_debug*
+
+# 不上传的文件夹
+pretrained_model/
+datasets/

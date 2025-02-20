@@ -1,6 +1,12 @@
 # AdaFace_gui: 基于AdaFace设计的gui界面
 <img src="assets/界面.png"/>
 
+### 1.去百度网盘下载数据集和预训练模型
+[百度网盘地址]
+(通过网盘分享的文件：adaface_gui资源下载
+链接: https://pan.baidu.com/s/1sJbamow3CPABssmb2-9n7A 提取码: ktkt)
+
+
 ### Repository Updates
 - [x] [CVLFace](https://github.com/mk-minchul/CVLface) is the **new official repository** for AdaFace (supports various architectures such as ViT, SWIN-ViT, KP-RPE, etc).
 - [x] Added PartialFC AdaFace implementation at [CVLFace](https://github.com/mk-minchul/CVLface) (and much more functionalities related to face recognition for conducting research).
