@@ -1,22 +1,30 @@
 # AdaFace_gui: 基于AdaFace设计的gui界面
 <img src="assets/界面.png"/>
 
-### 1.去百度网盘下载数据集和预训练模型
+### 1. 去百度网盘下载数据集和预训练模型
 [百度网盘地址]
 (通过网盘分享的文件：adaface_gui资源下载
 链接: https://pan.baidu.com/s/1sJbamow3CPABssmb2-9n7A 提取码: ktkt)
 
+### 2. 配置conda环境(windows环境下)
+```
+conda create --name adaface_gui python=3.8.20
+conda activate adaface_gui
 
-### Repository Updates
-- [x] [CVLFace](https://github.com/mk-minchul/CVLface) is the **new official repository** for AdaFace (supports various architectures such as ViT, SWIN-ViT, KP-RPE, etc).
-- [x] Added PartialFC AdaFace implementation at [CVLFace](https://github.com/mk-minchul/CVLface) (and much more functionalities related to face recognition for conducting research).
-- [x] Pytorch Lightning 1.8 compatibility is tested. 
-- [x] 5 Minute video presentation uploaded.
-- [x] Added the option to directly train with InsightFace dataset (train.rec) files without extracting images.
+pip install torch==2.1.0  -f https://mirrors.aliyun.com/pytorch-wheels/cu121
+pip install torchvision==0.16.0 -f https://mirrors.aliyun.com/pytorch-wheels/cu121
+(网速有点慢，试试在浏览器下载)
+    https://mirrors.aliyun.com/pytorch-wheels/cu121/torch-2.1.0%2Bcu121-cp38-cp38-win_amd64.whl
+    https://mirrors.aliyun.com/pytorch-wheels/cu121/torchvision-0.16.0%2Bcu121-cp38-cp38-win_amd64.whl
+    下载好之后 pip install  torchvision-0.16.0+cu121-cp38-cp38-win_amd64.whl
 
-### News
-- You can also check out our new paper `KP-RPE: KeyPoint Relative Position Encoding for Face Recognition` [Paper](https://arxiv.org/pdf/2403.14852) [Video](https://www.youtube.com/watch?v=sVFswDdPUH4) [Code](https://github.com/mk-minchul/CVLface) for facial landmark assisted face recognition. TLDR: Face recognition with facial landmark for alignment robustness. **(SoTA in TinyFace, IJB-S)**. 
-- You can also check out our new paper `Cluster and Aggregate (CAFace, NeurIPS2022)` [Link](https://paperswithcode.com/paper/cluster-and-aggregate-face-recognition-with) for video based face recognition. TLDR: Face recognition with long probe videos.
+pip install scikit-image matplotlib pandas scikit-learn 
+pip install -r requirements.txt
+```
+### 2.1 配置环境中遇到的问题
+   
+
+
 
 ### 5 Minute Video Presentation
 [![IMAGE ALT TEXT](assets/video_thumbnail.png)](https://www.youtube.com/watch?v=NfHzn6epAHM "AdaFace 5 minute video presentation")
