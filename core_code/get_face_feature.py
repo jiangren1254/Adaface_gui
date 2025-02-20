@@ -7,8 +7,7 @@ import torch
 import os
 import sys
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # 治表不治里解决方案
-# 获取 core_code 的上级目录路径，并添加到 sys.path
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 import net
 from face_alignment import align

@@ -1,21 +1,13 @@
-import yaml
-from dotmap import DotMap
-
-
 import os
 import sys
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # 治表不治里解决方案
-# 获取 core_code 的上级目录路径，并添加到 sys.path
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 import pickle
 from net import *
 from face_alignment import mtcnn
 from face_alignment import align
-
 import numpy as np
-import time
-import shutil
 from PIL import Image
 import torch
 import cv2
@@ -25,14 +17,10 @@ class face_detector:
 
     def __init__(
         self,
-        config,
         architecture="ir_101",
         face_features_path="./face_feature_lib/star_face_features.pkl",
         device="cuda:0",
         threshold=0.26,
-        # visualize_path="./illegalInfo/illegalImage/policy_person",
-        # name2class_path="./name2class.txt",
-        # laws_dir="./laws",
     ):
         self.adaface_models = {
             "ir_101": "./pretrained_model/adaface_ir101_ms1mv2.ckpt",
@@ -41,12 +29,16 @@ class face_detector:
         self.face_features_path = face_features_path
         self.device = device
         self.threshold = threshold
-        # self.visualize_path = visualize_path
-        # self.name2class_path = name2class_path
-        # self.laws_dir = laws_dir
-        self.config = config
-
         self._init_process()
+
+    def _init_process(self):
+        with open(self.face_features_path, "rb") as f:
+            self.face_features = pickle.load(f)
+
+        self.adaface_model = self._load_pretrained_model()
+        self.mtcnn_model = mtcnn.MTCNN(device=self.device, crop_size=(112, 112))
+
+        self.face_features_tensor, self.mask, self.name_list = self._arange_to_tensor()
 
     def _load_pretrained_model(self):
         # load model and pretrained statedict
@@ -65,56 +57,6 @@ class face_detector:
         model.eval()
 
         return model.to(self.device)
-
-    def _init_process(self):
-
-        # self.general_classifier = general_cls(self.config.classifier.cam_output_root, self.config.classifier.device)
-
-        with open(self.face_features_path, "rb") as f:
-            self.face_features = pickle.load(f)
-
-        self.adaface_model = self._load_pretrained_model()
-        self.mtcnn_model = mtcnn.MTCNN(device=self.device, crop_size=(112, 112))
-
-        self.face_features_tensor, self.mask, self.name_list = self._arange_to_tensor()
-
-        self.name2class = {}  # 读文件 name2class.txt
-        with open(self.name2class_path, "r", encoding="utf-8") as f:
-            items = f.read().split("\n")
-            for item in items:
-                name, clas = item.split(" ")
-                self.name2class[name] = clas
-
-        self.class2law = {}  # 定义了一个空字典 读取文件夹 ./laws 下的文件
-        for file in os.listdir(self.laws_dir):
-            if file == "Domestic_negative_policy_figures.txt":
-                with open(
-                    os.path.join(self.laws_dir, file), "r", encoding="utf-8"
-                ) as f:
-                    contents = f.read()
-                    self.class2law["负面人物-国内负面人物-国内负面政治人物"] = contents
-                    self.class2law["负面人物-国内负面人物-国内负面名人"] = contents
-            if file == "Reactionary_splitting.txt":
-                with open(
-                    os.path.join(self.laws_dir, file), "r", encoding="utf-8"
-                ) as f:
-                    contents = f.read()
-                    self.class2law["负面人物-国内负面人物-反动分裂"] = contents
-            if file == "Sensitive_political_event.txt":
-                with open(
-                    os.path.join(self.laws_dir, file), "r", encoding="utf-8"
-                ) as f:
-                    contents = f.read()
-                    self.class2law["负面人物-国内负面人物-敏感政治事件"] = contents
-                    self.class2law["负面人物-国际负面人物-受制裁的外国人"] = contents
-            if file == "leader.txt":
-                with open(
-                    os.path.join(self.laws_dir, file), "r", encoding="utf-8"
-                ) as f:
-                    contents = f.read()
-                    self.class2law["丑化正面人物-核心领导人"] = contents
-                    self.class2law["丑化正面人物-主要领导人"] = contents
-                    self.class2law["丑化正面人物-领导人家属"] = contents
 
     def _arange_to_tensor(self):
         # pad face_features and generate mask
@@ -137,10 +79,12 @@ class face_detector:
 
         return pad_face_features.to(self.device), mask.to(self.device), name_list
 
+    # ----------下面是自己写的函数------------------
     def get_multiple_aligned_faces(self, image_path, rgb_pil_image=None):
-        # 得到多个对其的人脸
         if rgb_pil_image is None:
-            img = Image.open(image_path).convert("RGB")
+            img = Image.fromarray(frame_rgb)
+            img = img.convert("RGB")
+            # img = Image.open(image_path).convert("RGB")
         else:
             assert isinstance(
                 rgb_pil_image, Image.Image
@@ -148,7 +92,7 @@ class face_detector:
             img = rgb_pil_image
         # find face
         try:
-            bboxes, faces = self.mtcnn_model.align_multi(img)
+            bboxes, faces = self.mtcnn_model.align_multi(img, limit=None)
             return bboxes, faces
         except Exception as e:
             print("Face detection Failed due to error.")
@@ -181,47 +125,11 @@ class face_detector:
         # 返回结果字典
         return result_dict
 
-    def check_idx(self):
-        return len(os.listdir(self.visualize_path))
-
-    def draw_boxes_and_names(self, img_path, face_list):
-        # 画框与写名字
-        img = cv2.imread(img_path)
-        for item in face_list:
-            sx1 = int(item[2][0])
-            sy1 = int(item[2][1])
-            sx2 = int(item[2][2])
-            sy2 = int(item[2][3])
-            cv2.rectangle(img, (sx1, sy1), (sx2, sy2), (0, 255, 0), 1)
-            if int(item[2][1]) > 10:
-                cv2.putText(
-                    img,
-                    item[0] + str(item[1]),
-                    (int(sx1), int(sy1 - 6)),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                    0.5,
-                    (0, 0, 255),
-                )
-            else:
-                cv2.putText(
-                    img,
-                    item[0] + str(item[1]),
-                    (int(sx1), int(sy1 + 15)),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                    0.5,
-                    (0, 0, 255),
-                )
-
-        # cv2.imwrite(detailed_img_path, img)
-        cv2.imshow("Image", img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        return img
-
     @torch.no_grad()
     def get_detect_results(self, frame_rgb):
-        bboxes, aligned_rgb_imgs = align.get_multiple_aligned_faces(frame_rgb)
-        # print("得到人脸的数量",len(bboxes))
+        # 这是主函数
+        bboxes, aligned_rgb_imgs = self.get_multiple_aligned_faces(frame_rgb)
+        print("得到人脸的数量", len(bboxes))
         if len(bboxes) == 0:
             # print(f"dected result: bboxes = 0")
             return []
@@ -242,16 +150,10 @@ class face_detector:
         return face_list
 
 
-def get_config():
-    with open("./config.yaml", "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    return DotMap(config)
-
-
 if __name__ == "__main__":
-    image_path = "cam_output/our_data1/test/Sun_Kunkun/2.jpg"
-    frame = cv2.imread(image_path)
+    image_path = "./datasets/test/刘亦菲1.jpeg"
+    frame = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+    # frame = cv2.imread(image_path)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    detector = face_detector(get_config())
+    detector = face_detector()
     print("检测器检测结果", detector.get_detect_results(frame_rgb))
