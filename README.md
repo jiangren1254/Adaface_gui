@@ -16,15 +16,25 @@ pip install torchvision==0.16.0 -f https://mirrors.aliyun.com/pytorch-wheels/cu1
 (网速有点慢，试试在浏览器下载)
     https://mirrors.aliyun.com/pytorch-wheels/cu121/torch-2.1.0%2Bcu121-cp38-cp38-win_amd64.whl
     https://mirrors.aliyun.com/pytorch-wheels/cu121/torchvision-0.16.0%2Bcu121-cp38-cp38-win_amd64.whl
-    下载好之后 pip install  torchvision-0.16.0+cu121-cp38-cp38-win_amd64.whl
+    下载好之后 
+    pip install torch-2.1.0+cu121-cp38-cp38-win_amd64.whl torchvision-0.16.0+cu121-cp38-cp38-win_amd64.whl
+测试torch_gpu是否可用
+```python
+    import torch
 
-pip install scikit-image matplotlib pandas scikit-learn 
+    # 检查GPU是否可用
+    if torch.cuda.is_available():
+        print("GPU可用！")
+    else:
+        print("GPU不可用，将使用CPU进行计算。")
+
 pip install -r requirements.txt
 ```
 ### 2.1 配置环境中遇到的问题
-   
+暂无
 
-
+### 3 运行core_code中的代码
+1. get_face_feature.py 得到.pkl文件
 
 ### 5 Minute Video Presentation
 [![IMAGE ALT TEXT](assets/video_thumbnail.png)](https://www.youtube.com/watch?v=NfHzn6epAHM "AdaFace 5 minute video presentation")
