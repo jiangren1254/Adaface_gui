@@ -33,6 +33,12 @@ pip install -r requirements.txt
 #### 2.1 adaface模型推理测试
 python inference.py
 
+运行结果：(这是正确的)
+```
+tensor([[ 1.0000,  0.7456, -0.0823],
+        [ 0.7456,  1.0000, -0.0066],
+        [-0.0823, -0.0066,  1.0000]], grad_fn=<MmBackward0>)
+```
 ### 3 运行core_code中的代码
 1. get_face_feature.py 得到.pkl文件
 
