@@ -18,12 +18,12 @@ class face_detector:
     def __init__(
         self,
         architecture="ir_101",
-        face_features_path="./face_feature_lib/star_face_features.pkl",
+        face_features_path=r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\face_feature_lib\star_face_features.pkl",
         device="cuda:0",
         threshold=0.26,
     ):
         self.adaface_models = {
-            "ir_101": "./pretrained_model/adaface_ir101_ms1mv2.ckpt",
+            "ir_101": r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\pretrained_model\adaface_ir101_ms1mv2.ckpt",
         }
         self.architecture = architecture
         self.face_features_path = face_features_path
@@ -128,7 +128,7 @@ class face_detector:
     @torch.no_grad()
     def get_detect_results(self, frame_rgb):
         # 这是主函数
-        bboxes, aligned_rgb_imgs = self.get_multiple_aligned_faces(frame_rgb)
+        bboxes, aligned_rgb_imgs = align.get_multiple_aligned_faces(frame_rgb)
         print("得到人脸的数量", len(bboxes))
         if len(bboxes) == 0:
             # print(f"dected result: bboxes = 0")

@@ -45,9 +45,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.timer.start(30)  # 每隔30ms捕获一帧
         # 初始化模型
         self.detector = face_detector()
-        # self.rootFeatureImg = (
-        #     r"G:\400-Adaface\AdaFace-masterT2\AdaFace-master-skk\our_data1\train"
-        # )
+        self.rootFeatureImg = (
+            r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\datasets\train"
+        )
 
     def update_frame(self):
         ret, frame = self.cap.read()

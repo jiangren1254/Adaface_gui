@@ -7,9 +7,11 @@ from PIL import Image
 from tqdm import tqdm
 import random
 from datetime import datetime
-mtcnn_model = mtcnn.MTCNN(device='cuda:0', crop_size=(112, 112))
 
-def add_padding(pil_img, top, right, bottom, left, color=(0,0,0)):
+mtcnn_model = mtcnn.MTCNN(device="cuda:0", crop_size=(112, 112))
+
+
+def add_padding(pil_img, top, right, bottom, left, color=(0, 0, 0)):
     width, height = pil_img.size
     new_width = width + right + left
     new_height = height + top + bottom
@@ -17,21 +19,41 @@ def add_padding(pil_img, top, right, bottom, left, color=(0,0,0)):
     result.paste(pil_img, (left, top))
     return result
 
+
 def get_aligned_face(image_path, rgb_pil_image=None):
     if rgb_pil_image is None:
-        img = Image.open(image_path).convert('RGB')
+        img = Image.open(image_path).convert("RGB")
     else:
-        assert isinstance(rgb_pil_image, Image.Image), 'Face alignment module requires PIL image or path to the image'
+        assert isinstance(
+            rgb_pil_image, Image.Image
+        ), "Face alignment module requires PIL image or path to the image"
         img = rgb_pil_image
     # find face
     try:
         bboxes, faces = mtcnn_model.align_multi(img, limit=1)
         face = faces[0]
     except Exception as e:
-        print('Face detection Failed due to error.')
+        print("Face detection Failed due to error.")
         print(e)
         face = None
 
     return face
 
 
+def get_multiple_aligned_faces(frame_rgb, rgb_pil_image=None):
+    if rgb_pil_image is None:
+        img = Image.fromarray(frame_rgb)
+        img = img.convert("RGB")
+        # img = Image.open(image_path).convert('RGB')
+    else:
+        assert isinstance(
+            rgb_pil_image, Image.Image
+        ), "Face alignment module requires PIL image or path to the image"
+        img = rgb_pil_image
+    # find face
+    try:
+        bboxes, faces = mtcnn_model.align_multi(img, limit=None)
+        return bboxes, faces
+    except Exception as e:
+        print("Face detection Failed due to error.")
+        print(e)
