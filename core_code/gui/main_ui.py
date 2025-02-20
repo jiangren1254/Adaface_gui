@@ -36,18 +36,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print("无法打开摄像头")
             exit()
 
-        # 禁用 QLabel 内容的自动拉伸
-        self.input.setScaledContents(False)
-
-        # 使用QTimer来代替while循环
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)  # 每隔30ms捕获一帧
-        # 初始化模型
-        self.detector = face_detector()
-        self.rootFeatureImg = (
-            r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\datasets\train"
-        )
+        # # 使用QTimer来代替while循环
+        # self.timer = QTimer()
+        # self.timer.timeout.connect(self.update_frame)
+        # self.timer.start(30)  # 每隔30ms捕获一帧
+        # # 初始化模型
+        # self.detector = face_detector()
+        # self.rootFeatureImg = (
+        #     r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\datasets\train"
+        # )
 
     def update_frame(self):
         ret, frame = self.cap.read()
