@@ -11,5 +11,5 @@ result
 scripts/run_debug*
 
 # 不上传的文件夹
-pretrained_model/
-datasets/
+core_code/pretrained_model/
+core_code/datasets/

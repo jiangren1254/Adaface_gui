@@ -14,7 +14,7 @@ import pickle
 
 # TODO: add model
 adaface_models = {
-    "ir_101": "pretrained_model/adaface_ir101_ms1mv2.ckpt",
+    "ir_101": "../pretrained_model/adaface_ir101_ms1mv2.ckpt",
 }
 
 
