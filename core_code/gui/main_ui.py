@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 from PySide6.QtCore import QTimer, Qt, QTime
-from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog
 from PySide6.QtGui import QPixmap, QImage
 
 from main_window_ui import Ui_MainWindow
@@ -41,9 +41,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cameraTimer = QTimer()
         self.cameraTimer.timeout.connect(self.update_frame)
         # 按键与函数关联
+        self.pushButton_faceInput.clicked.connect(self.face_input)
+        self.pushButton_about.clicked.connect(self.show_about)
+        self.pushButton_quit.clicked.connect(self.close_event)
         self.pushButton_open.clicked.connect(self.open_camera)
         self.pushButton_close.clicked.connect(self.close_camera)
-
+    def face_input(self):
+        """人脸录入按钮"""
+        if self.cap is None or not self.cap.isOpened():
+            QMessageBox.warning(self, "提示", "请先打开摄像头！")
+            return
+        ret, frame = self.cap.read()
+        if not ret:
+            QMessageBox.critical(self, "错误", "无法获取摄像头图像！")
+            return
+        name, ok1 = QInputDialog.getText(self, "人脸录入", "请输入姓名：")
+        if not ok1 or not name.strip():
+            return  
+        id_card, ok2 = QInputDialog.getText(self, "人脸录入", "请输入身份证号：")
+        if not ok2 or not id_card.strip():
+            return  
+        QMessageBox.information(self, "成功", f"录入成功！\n姓名：{name}\n身份证号：{id_card}")
+    def show_about(self):
+        """关于按钮"""
+        QMessageBox.about(self,"关于",
+            "<h3>软件名称：面向安全系统的面部识别系统</h3>"
+            "<p><b>作者团队：</b> XXX团队</p>"
+            "<p><b>版本号：</b> v1.0.0</p>"
+            "<p><b>鸣谢：</b> 感谢所有支持本项目的朋友！</p>",)
+    def close_event(self):
+        """退出按钮"""
+        reply = QMessageBox.question(self,"退出确认","确定要退出吗？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,QMessageBox.StandardButton.No,)
+        if reply == QMessageBox.StandardButton.Yes:
+            self.close()
     def update_time(self):
         """更新实时时间"""
         current_time = QTime.currentTime().toString("HH:mm:ss")
@@ -69,7 +100,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = frame.shape
         qt_img = QImage(frame.data, w, h, ch * w, QImage.Format.Format_RGB888)
-        self.label_camera.setPixmap(QPixmap.fromImage(qt_img))
+        q_pixmap = QPixmap.fromImage(qt_img)
+        label_width = self.label_camera.width()
+        label_height = self.label_camera.height()
+        scaled_pixmap = q_pixmap.scaled(label_width, label_height, Qt.KeepAspectRatio)
+        self.label_camera.setPixmap(scaled_pixmap)
 
     def close_camera(self):
         """关闭摄像头"""
@@ -113,32 +148,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.output.setPixmap(self.np_to_qpixmap(image))
         return frame
 
-    def np_to_qpixmap(self, frame):
-        """
-        将OpenCV的frame转换为QPixmap并保持宽高比
-        将 OpenCV 的 BGR 图像转换为 RGB，因为 Qt 使用的是 RGB 色彩空间。
-        """
-        # 将BGR格式转换为RGB格式
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        height, width, channel = frame.shape
-        bytes_per_line = 3 * width
-        q_image = QImage(
-            frame.data, width, height, bytes_per_line, QImage.Format_RGB888
-        )
-        q_pixmap = QPixmap.fromImage(q_image)
-
-        # 获取 QLabel 的尺寸
-        label_width = self.input.width()
-        label_height = self.input.height()
-
-        # 根据宽高比缩放图像，保持比例并适应 QLabel 的大小
-        scaled_pixmap = q_pixmap.scaled(label_width, label_height, Qt.KeepAspectRatio)
-
-        return scaled_pixmap
-
     def closeEvent(self, event):
-        """在窗口关闭时，释放摄像头资源"""
-
+        """在窗口关闭时，自动调用，释放资源"""
         cv2.destroyAllWindows()
         event.accept()
 

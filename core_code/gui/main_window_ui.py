@@ -186,7 +186,7 @@ class Ui_MainWindow(object):
 
         self.label_camera = QLabel(self.centralwidget)
         self.label_camera.setObjectName(u"label_camera")
-        self.label_camera.setGeometry(QRect(360, 110, 311, 221))
+        self.label_camera.setGeometry(QRect(360, 110, 301, 221))
         self.label_camera.setStyleSheet(u"border: 2px solid black;")
         self.label_recog_result = QLabel(self.centralwidget)
         self.label_recog_result.setObjectName(u"label_recog_result")
