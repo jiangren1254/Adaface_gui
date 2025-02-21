@@ -162,7 +162,7 @@ class Ui_MainWindow(object):
         self.line_2.setFrameShadow(QFrame.Sunken)
         self.horizontalLayoutWidget = QWidget(self.centralwidget)
         self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
-        self.horizontalLayoutWidget.setGeometry(QRect(400, 60, 211, 41))
+        self.horizontalLayoutWidget.setGeometry(QRect(400, 60, 211, 42))
         self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -175,14 +175,14 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.pushButton_open)
 
-        self.pushButton_off = QPushButton(self.horizontalLayoutWidget)
-        self.pushButton_off.setObjectName(u"pushButton_off")
-        self.pushButton_off.setMaximumSize(QSize(70, 40))
-        self.pushButton_off.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
+        self.pushButton_close = QPushButton(self.horizontalLayoutWidget)
+        self.pushButton_close.setObjectName(u"pushButton_close")
+        self.pushButton_close.setMaximumSize(QSize(70, 40))
+        self.pushButton_close.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
 " color:rgb(0, 255, 0);\n"
 " font-size: 16px; padding: 10px;")
 
-        self.horizontalLayout.addWidget(self.pushButton_off)
+        self.horizontalLayout.addWidget(self.pushButton_close)
 
         self.label_camera = QLabel(self.centralwidget)
         self.label_camera.setObjectName(u"label_camera")
@@ -333,7 +333,7 @@ class Ui_MainWindow(object):
         self.label_bg2.setText(QCoreApplication.translate("MainWindow", u"\u6444\u50cf\u5934", None))
         self.progressBar.setFormat(QCoreApplication.translate("MainWindow", u"%p%", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"\u6253\u5f00", None))
-        self.pushButton_off.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed", None))
+        self.pushButton_close.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed", None))
         self.label_camera.setText("")
         self.label_recog_result.setText("")
         self.pushButton_open_2.setText(QCoreApplication.translate("MainWindow", u"\u8bc6\u522b", None))

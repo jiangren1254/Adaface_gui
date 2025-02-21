@@ -281,7 +281,7 @@ font-size: 22px;
       <x>400</x>
       <y>60</y>
       <width>211</width>
-      <height>41</height>
+      <height>42</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -304,7 +304,7 @@ font-size: 22px;
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_off">
+      <widget class="QPushButton" name="pushButton_close">
        <property name="maximumSize">
         <size>
          <width>70</width>
