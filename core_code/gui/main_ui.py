@@ -17,6 +17,7 @@ print(f"当前工作目录: {os.getcwd()}")
 import time
 import torch
 import numpy as np
+import sqlite3
 import pandas as pd
 
 from PySide6.QtCore import QTimer, Qt, QTime
@@ -26,11 +27,100 @@ from PySide6.QtGui import QPixmap, QImage
 from main_window_ui import Ui_MainWindow
 from face_recognize import face_detector
 
+class FaceDatabase:
+    def __init__(self, db_name="face_database.db"):
+        """ 初始化数据库连接 """
+        self.db_name = db_name
+        self.create_table()
+    def create_table(self):
+        """ 创建 face_data 表（如果不存在） """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS face_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                id_card TEXT UNIQUE NOT NULL,
+                image BLOB NOT NULL
+            )
+        ''')
+        conn.commit()
+        conn.close()
+    def insert_data(self, name, id_card, frame):
+        """ 插入数据：姓名、身份证号、图像 """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        _, img_encoded = cv2.imencode('.jpg', frame)
+        img_bytes = img_encoded.tobytes()
+
+        try:
+            cursor.execute("INSERT INTO face_data (name, id_card, image) VALUES (?, ?, ?)", 
+                           (name, id_card, img_bytes))
+            conn.commit()
+            print("数据插入成功！")
+        except sqlite3.IntegrityError:
+            print("该身份证号已存在，插入失败！")
+
+        conn.close()
+    def delete_data(self, id_card):
+        """ 根据身份证号删除数据 """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM face_data WHERE id_card=?", (id_card,))
+        conn.commit()
+
+        if cursor.rowcount > 0:
+            print("数据删除成功！")
+        else:
+            print("该身份证号不存在！")
+
+        conn.close()
+    def update_data(self, id_card, new_name=None, new_image=None):
+        """ 根据身份证号更新姓名或图像 """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        if new_name:
+            cursor.execute("UPDATE face_data SET name=? WHERE id_card=?", (new_name, id_card))
+        
+        if new_image is not None:
+            _, img_encoded = cv2.imencode('.jpg', new_image)
+            img_bytes = img_encoded.tobytes()
+            cursor.execute("UPDATE face_data SET image=? WHERE id_card=?", (img_bytes, id_card))
+
+        conn.commit()
+
+        if cursor.rowcount > 0:
+            print("数据更新成功！")
+        else:
+            print("该身份证号不存在，更新失败！")
+
+        conn.close()
+    def get_face_data(self, id_card):
+        """ 查询数据：根据身份证号获取姓名和图像 """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name, image FROM face_data WHERE id_card=?", (id_card,))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            name, img_bytes = result
+            img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            return name, img
+        else:
+            print("未找到该身份证号的记录！")
+            return None, None
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
+        self.db = FaceDatabase()
         # 实时时间定时器
         self.realTimer = QTimer(self)
         self.realTimer.timeout.connect(self.update_time)
@@ -60,7 +150,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return  
         id_card, ok2 = QInputDialog.getText(self, "人脸录入", "请输入身份证号：")
         if not ok2 or not id_card.strip():
-            return  
+            return 
+        self.db.insert_data(name,id_card,frame)
         QMessageBox.information(self, "成功", f"录入成功！\n姓名：{name}\n身份证号：{id_card}")
     def show_about(self):
         """关于按钮"""
@@ -155,6 +246,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
+    # gui界面
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

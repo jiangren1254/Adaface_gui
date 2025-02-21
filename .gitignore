@@ -13,3 +13,6 @@ scripts/run_debug*
 # 不上传的文件夹
 core_code/pretrained_model/
 core_code/datasets/
+
+# 数据库不上传
+face_database.db
