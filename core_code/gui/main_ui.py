@@ -19,9 +19,12 @@ import torch
 import numpy as np
 import sqlite3
 import pandas as pd
+import matplotlib.pyplot as plt
+import win32gui
+import win32con
 
 from PySide6.QtCore import QTimer, Qt, QTime
-from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog
+from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog,QDialog,QVBoxLayout,QTableWidget,QHBoxLayout,QPushButton,QTableWidgetItem,QLabel
 from PySide6.QtGui import QPixmap, QImage
 
 from main_window_ui import Ui_MainWindow
@@ -53,16 +56,17 @@ class FaceDatabase:
 
         _, img_encoded = cv2.imencode('.jpg', frame)
         img_bytes = img_encoded.tobytes()
-
         try:
             cursor.execute("INSERT INTO face_data (name, id_card, image) VALUES (?, ?, ?)", 
                            (name, id_card, img_bytes))
             conn.commit()
-            print("数据插入成功！")
-        except sqlite3.IntegrityError:
-            print("该身份证号已存在，插入失败！")
+            conn.close()
+            return True, "录入成功"
 
-        conn.close()
+        except sqlite3.IntegrityError:
+            conn.close()
+            return False, "该身份证号已存在，插入失败"
+        
     def delete_data(self, id_card):
         """ 根据身份证号删除数据 """
         conn = sqlite3.connect(self.db_name)
@@ -75,7 +79,7 @@ class FaceDatabase:
             print("数据删除成功！")
         else:
             print("该身份证号不存在！")
-
+        conn.execute("VACUUM")
         conn.close()
     def update_data(self, id_card, new_name=None, new_image=None):
         """ 根据身份证号更新姓名或图像 """
@@ -113,7 +117,7 @@ class FaceDatabase:
             img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
             return name, img
         else:
-            print("未找到该身份证号的记录！")
+            print("未找到该身份证号的记录！！")
             return None, None
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -132,6 +136,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cameraTimer.timeout.connect(self.update_frame)
         # 按键与函数关联
         self.pushButton_faceInput.clicked.connect(self.face_input)
+        self.pushButton_database.clicked.connect(self.manage_db)
+        
         self.pushButton_about.clicked.connect(self.show_about)
         self.pushButton_quit.clicked.connect(self.close_event)
         self.pushButton_open.clicked.connect(self.open_camera)
@@ -151,8 +157,123 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         id_card, ok2 = QInputDialog.getText(self, "人脸录入", "请输入身份证号：")
         if not ok2 or not id_card.strip():
             return 
-        self.db.insert_data(name,id_card,frame)
-        QMessageBox.information(self, "成功", f"录入成功！\n姓名：{name}\n身份证号：{id_card}")
+        success, message = self.db.insert_data(name, id_card, frame)
+        if success:
+            QMessageBox.information(self, "数据插入成功！", f"录入成功！\n姓名：{name}\n身份证号：{id_card}")
+        else:
+            QMessageBox.warning(self, "错误", message)
+    def manage_db(self):
+        """打开数据库管理窗口"""
+        self.db_window = QDialog(self)
+        self.db_window.setWindowTitle("数据库管理")
+        self.db_window.resize(600, 400)
+        layout = QVBoxLayout()
+        # 创建表格控件
+        self.table = QTableWidget()
+        self.table.setColumnCount(2)
+        self.table.setHorizontalHeaderLabels(["姓名", "身份证号"])
+        self.table.setColumnWidth(0, 150) 
+        self.table.setColumnWidth(1, 200) 
+        def load_data():
+            """ 加载数据库数据到 QTableWidget """
+            self.table.setRowCount(0)
+            conn = sqlite3.connect(self.db.db_name)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name, id_card FROM face_data")
+            data = cursor.fetchall()
+            conn.close()
+
+            for row_idx, (name, id_card) in enumerate(data):
+                self.table.insertRow(row_idx)
+                self.table.setItem(row_idx, 0, QTableWidgetItem(name))
+                self.table.setItem(row_idx, 1, QTableWidgetItem(id_card))
+        load_data() 
+        layout.addWidget(self.table)
+        # 创建操作按钮
+        def delete_selected():
+            """ 删除选中行的数据库数据 """
+            selected_row = self.table.currentRow()
+            if selected_row == -1:
+                QMessageBox.warning(self, "提示", "请选择要删除的数据！")
+                return
+            id_card = self.table.item(selected_row, 1).text()
+            self.db.delete_data(id_card) 
+            self.table.removeRow(selected_row)
+        def update_selected():
+            """ 更新选中的姓名 """
+            selected_row = self.table.currentRow()
+            if selected_row == -1:
+                QMessageBox.warning(self, "提示", "请选择要更新的数据！")
+                return
+            id_card = self.table.item(selected_row, 1).text()
+            new_name, ok = QInputDialog.getText(self, "更新姓名", "请输入新的姓名：")
+            if ok and new_name.strip():
+                self.db.update_data(id_card, new_name=new_name)
+                self.table.setItem(selected_row, 0, QTableWidgetItem(new_name))
+        def view_image():
+            """ 查看选中行的图像 """
+            selected_row = self.table.currentRow()
+            if selected_row == -1:
+                QMessageBox.warning(self, "提示", "请选择要查看的图像！")
+                return
+            id_card = self.table.item(selected_row, 1).text()
+            name, img = self.db.get_face_data(id_card)
+
+
+            if img is not None:
+                window_name = "photo"  # 先用英文窗口名
+                cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
+                cv2.imshow(window_name, img)
+
+                # 通过 win32gui 修改窗口标题
+                hwnd = win32gui.FindWindow(None, window_name)
+                if hwnd:
+                    win32gui.SetWindowText(hwnd, f"{name} 的照片")  # 设置中文标题
+                
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+        def search_data():
+            """ 搜索数据库中的数据 """
+            for row in range(self.table.rowCount()):
+                self.table.setRowHidden(row, False) 
+            search_text, ok = QInputDialog.getText(self, "搜索", "请输入姓名或身份证号：")
+            if not ok or not search_text.strip():
+                return
+            
+            search_text = search_text.strip()
+            found = False
+
+            for row in range(self.table.rowCount()):
+                name_item = self.table.item(row, 0)
+                id_card_item = self.table.item(row, 1)
+
+                if name_item and id_card_item:
+                    if search_text in name_item.text() or search_text in id_card_item.text():
+                        self.table.selectRow(row)  
+                        found = True
+                    else:
+                        self.table.setRowHidden(row, True)  
+
+            if not found:
+                QMessageBox.information(self, "搜索结果", "未找到匹配的数据！")
+        btn_layout = QHBoxLayout()
+        self.btn_delete = QPushButton("删除选中")
+        self.btn_delete.clicked.connect(delete_selected)
+        self.btn_update = QPushButton("更新姓名")
+        self.btn_update.clicked.connect(update_selected)
+        self.btn_view_image = QPushButton("查看图像")
+        self.btn_view_image.clicked.connect(view_image)
+        self.btn_search_data = QPushButton("搜索")
+        self.btn_search_data.clicked.connect(search_data) 
+        btn_layout.addWidget(self.btn_delete)
+        btn_layout.addWidget(self.btn_update)
+        btn_layout.addWidget(self.btn_view_image)
+        btn_layout.addWidget(self.btn_search_data)
+        layout.addLayout(btn_layout)
+
+        self.db_window.setLayout(layout)
+        self.db_window.exec()
+
     def show_about(self):
         """关于按钮"""
         QMessageBox.about(self,"关于",

@@ -151,7 +151,7 @@ class face_detector:
 
 
 if __name__ == "__main__":
-    image_path = "./datasets/test/刘亦菲1.jpeg"
+    image_path = "./datasets/test/胡歌1.jpg"
     frame = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
     # frame = cv2.imread(image_path)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
