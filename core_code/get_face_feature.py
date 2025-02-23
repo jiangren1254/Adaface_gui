@@ -6,6 +6,9 @@
 import torch
 import os
 import sys
+import sqlite3
+from PIL import Image
+import io
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
@@ -47,24 +50,45 @@ if __name__ == "__main__":
     features_dic = {}
     features_file = "face_feature_lib/star_face_features.pkl"
 
+    # with torch.no_grad():
+    #     for name in os.listdir(individual_root):
+    #         print(name)
+    #         features_dic[name] = []
+    #         for fname in sorted(os.listdir(os.path.join(individual_root, name))):
+    #             path = os.path.join(individual_root, name, fname)
+    #             aligned_rgb_img = align.get_aligned_face(path)
+    #             if aligned_rgb_img == None:
+    #                 continue
+    #             try:
+    #                 bgr_tensor_input = to_input(aligned_rgb_img)
+    #                 feature, _ = model(bgr_tensor_input.to(0))
+    #                 print("feature shape:", feature.shape)
+    #                 features_dic[name].append(feature.cpu())
+    #             except:
+    #                 raise RuntimeError("Extract feature failed!")
+
+    #         features_dic[name] = torch.cat(features_dic[name], dim=0)
     with torch.no_grad():
-        for name in os.listdir(individual_root):
-            print(name)
-            features_dic[name] = []
-            for fname in sorted(os.listdir(os.path.join(individual_root, name))):
-                path = os.path.join(individual_root, name, fname)
-                aligned_rgb_img = align.get_aligned_face(path)
-                if aligned_rgb_img == None:
-                    continue
+        conn = sqlite3.connect("./gui/face_database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, id_card,image FROM face_data")
+        data_list = cursor.fetchall()
+        for name,id_card, img_blob in data_list:
+            print(name,id_card)
+            features_dic[name] = [] #(起名字时不能重复，如果同名，名字后面加入1,2,3)
+            if img_blob is not None:
+                rgb_pil_image = Image.open(io.BytesIO(img_blob)).convert("RGB")
+                aligned_rgb_img = align.get_aligned_face(image_path=None, rgb_pil_image=rgb_pil_image)
+                if aligned_rgb_img is None:
+                    raise RuntimeError("检测人脸图像中是否有遮挡!")
                 try:
                     bgr_tensor_input = to_input(aligned_rgb_img)
                     feature, _ = model(bgr_tensor_input.to(0))
-                    print("feature shape:", feature.shape)
+                    # print("feature shape:", feature.shape)
                     features_dic[name].append(feature.cpu())
                 except:
                     raise RuntimeError("Extract feature failed!")
-
             features_dic[name] = torch.cat(features_dic[name], dim=0)
-
+        conn.close()   
     pickle.dump(features_dic, open(features_file, "wb"))
     print(f"{features_file} saved")

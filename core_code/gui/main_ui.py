@@ -124,7 +124,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
-        self.db = FaceDatabase()
+        # 初始化模型
+        self.detector = face_detector()
+        self.db = FaceDatabase(db_name="face_database.db")
         # 实时时间定时器
         self.realTimer = QTimer(self)
         self.realTimer.timeout.connect(self.update_time)
@@ -136,12 +138,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cameraTimer.timeout.connect(self.update_frame)
         # 按键与函数关联
         self.pushButton_faceInput.clicked.connect(self.face_input)
+        self.pushButton_face_recog.clicked.connect(self.face_recog)
         self.pushButton_database.clicked.connect(self.manage_db)
-        
         self.pushButton_about.clicked.connect(self.show_about)
         self.pushButton_quit.clicked.connect(self.close_event)
         self.pushButton_open.clicked.connect(self.open_camera)
         self.pushButton_close.clicked.connect(self.close_camera)
+        # 人脸识别开关
+        self.face_recog_switch = False
     def face_input(self):
         """人脸录入按钮"""
         if self.cap is None or not self.cap.isOpened():
@@ -162,6 +166,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.information(self, "数据插入成功！", f"录入成功！\n姓名：{name}\n身份证号：{id_card}")
         else:
             QMessageBox.warning(self, "错误", message)
+    def face_recog(self):
+        """人脸识别按钮"""
+        if self.cap is None or not self.cap.isOpened():
+            QMessageBox.warning(self, "提示", "请先打开摄像头！")
+            return
+        if self.face_recog_switch:
+            self.face_recog_switch = False
+        else:
+            self.face_recog_switch = True
+    #     读取当前摄像头图像
     def manage_db(self):
         """打开数据库管理窗口"""
         self.db_window = QDialog(self)
@@ -221,14 +235,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
             if img is not None:
-                window_name = "photo"  # 先用英文窗口名
+                h,w,c = img.shape
+                scale = min(800 / w, 600 / h, 1.0)
+                n_w,n_h = int(w * scale),int(h * scale)
+                resized_img = cv2.resize(img, (n_w, n_h), interpolation=cv2.INTER_AREA)
+                window_name = "photo" 
                 cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-                cv2.imshow(window_name, img)
+                cv2.imshow(window_name, resized_img)
 
                 # 通过 win32gui 修改窗口标题
                 hwnd = win32gui.FindWindow(None, window_name)
                 if hwnd:
-                    win32gui.SetWindowText(hwnd, f"{name} 的照片")  # 设置中文标题
+                    win32gui.SetWindowText(hwnd, f"{name} 的照片")
                 
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
@@ -256,7 +274,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             if not found:
                 QMessageBox.information(self, "搜索结果", "未找到匹配的数据！")
+        def add_face():
+            """添加人脸"""
+            default_dir = r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\datasets\train"
+            fp = QFileDialog.getExistingDirectory(None, "选择人脸文件夹", default_dir)
+            if not fp:
+                return
+            fn = os.path.basename(fp)
+            if "_" not in fn:
+                print("文件夹名称格式不正确，应为 '姓名_身份证号'")
+                return
+            name, id_card = fn.split("_", 1)
+            img_p,_ = QFileDialog.getOpenFileName(None, "选择人脸图片", fp, "Images (*.png *.jpg *.jpeg)")
+            if not img_p:
+                return
+            print("img_path",img_p)
+            img_array = np.fromfile(img_p, dtype=np.uint8)
+            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            if img is None:
+                print("无法读取图片")
+                return
+            success, message = self.db.insert_data(name, id_card, img)
+            if success:
+                QMessageBox.information(self, "数据插入成功！", f"录入成功！\n姓名：{name}\n身份证号：{id_card}")
+            else:
+                QMessageBox.warning(self, "错误", message)
         btn_layout = QHBoxLayout()
+        self.add_face =QPushButton("从图片添加人脸")
+        self.add_face.clicked.connect(add_face)
         self.btn_delete = QPushButton("删除选中")
         self.btn_delete.clicked.connect(delete_selected)
         self.btn_update = QPushButton("更新姓名")
@@ -264,7 +309,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btn_view_image = QPushButton("查看图像")
         self.btn_view_image.clicked.connect(view_image)
         self.btn_search_data = QPushButton("搜索")
-        self.btn_search_data.clicked.connect(search_data) 
+        self.btn_search_data.clicked.connect(search_data)
+        btn_layout.addWidget(self.add_face)
         btn_layout.addWidget(self.btn_delete)
         btn_layout.addWidget(self.btn_update)
         btn_layout.addWidget(self.btn_view_image)
@@ -307,9 +353,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ret, frame = self.cap.read()
         if not ret:
             print("无法接收帧而结束")
-            self.timer.stop()
+            self.cameraTimer.stop()
             return
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # 人脸识别开关
+        if self.face_recog_switch:
+            frame_rgb = frame
+            face_list = self.detector.get_detect_results(frame_rgb)
+            if len(face_list) !=0:
+                print("检测器检测结果", face_list)
+                name, sim,_ = face_list[0]
+                self.label_name.setText(name)
+                # self.label_id_card.setText(id_card)
+                self.progressBar_sim.setValue(int(sim*100+0.5))
+                self.label_time_2.setText(QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))
+                self.frame.setStyleSheet("""QFrame {background-color: green;border-radius: 25px; border: 2px solid black;}""")
+                self.face_recog_switch = False
+                
         h, w, ch = frame.shape
         qt_img = QImage(frame.data, w, h, ch * w, QImage.Format.Format_RGB888)
         q_pixmap = QPixmap.fromImage(qt_img)
@@ -321,9 +381,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def close_camera(self):
         """关闭摄像头"""
         if self.cap:
+            self.frame.setStyleSheet("""QFrame {background-color: red;border-radius: 25px; border: 2px solid black;}""")
             self.cameraTimer.stop()
             self.cap.release()
             self.cap = None
+            self.face_recog_switch = False
             self.label_camera.clear()
 
     def draw_boxes_and_names(self, frame, face_list):
@@ -335,31 +397,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sy2 = int(item[2][3])
             cv2.rectangle(frame, (sx1, sy1), (sx2, sy2), (0, 255, 0), 2)
             if int(item[2][1]) > 10:
-                cv2.putText(
-                    frame,
-                    item[0],
-                    (int(sx1), int(sy1 - 6)),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                    1.0,
-                    (0, 0, 255),
-                )
+                cv2.putText(frame,item[0],(int(sx1), int(sy1 - 6)),
+                    cv2.FONT_HERSHEY_COMPLEX_SMALL,1.0,(0, 0, 255),)
             else:
-                cv2.putText(
-                    frame,
-                    item[0],
-                    (int(sx1), int(sy1 + 15)),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                    1.0,
-                    (0, 0, 255),
-                )
+                cv2.putText(frame,item[0],(int(sx1), int(sy1 + 15)),
+                    cv2.FONT_HERSHEY_COMPLEX_SMALL,1.0,(0, 0, 255),)
             # 1.2--将人脸特征库的照片显示出出来---
             img_dir = os.path.join(self.rootFeatureImg, item[0])
             img_path = os.path.join(img_dir, "0.jpg")
             image = cv2.imread(img_path)
             if image is not None:
-                self.output.setPixmap(self.np_to_qpixmap(image))
+                self.label_recog_result.setPixmap(self.np_to_qpixmap(image))
         return frame
 
+    def np_to_qpixmap(self, frame):
+        """
+        将OpenCV的frame转换为QPixmap并保持宽高比
+        将 OpenCV 的 BGR 图像转换为 RGB，因为 Qt 使用的是 RGB 色彩空间。
+        """
+        # 将BGR格式转换为RGB格式
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        height, width, channel = frame.shape
+        bytes_per_line = 3 * width
+        q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        q_pixmap = QPixmap.fromImage(q_image)
+
+        # 获取 QLabel 的尺寸
+        label_width = self.input.width()
+        label_height = self.input.height()
+
+        # 根据宽高比缩放图像，保持比例并适应 QLabel 的大小
+        scaled_pixmap = q_pixmap.scaled(label_width, label_height, Qt.KeepAspectRatio)
+        
+        return scaled_pixmap
     def closeEvent(self, event):
         """在窗口关闭时，自动调用，释放资源"""
         cv2.destroyAllWindows()

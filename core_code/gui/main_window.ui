@@ -240,7 +240,7 @@ font-size: 22px;
      <string>摄像头</string>
     </property>
    </widget>
-   <widget class="QProgressBar" name="progressBar">
+   <widget class="QProgressBar" name="progressBar_sim">
     <property name="geometry">
      <rect>
       <x>830</x>
@@ -419,7 +419,7 @@ font-size: 22px;
      <rect>
       <x>720</x>
       <y>80</y>
-      <width>61</width>
+      <width>91</width>
       <height>20</height>
      </rect>
     </property>
@@ -431,7 +431,7 @@ font-size: 22px;
 border: 1px solid black;</string>
     </property>
     <property name="text">
-     <string>姓名:</string>
+     <string>姓     名:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_name">
@@ -446,16 +446,15 @@ border: 1px solid black;</string>
     <property name="styleSheet">
      <string notr="true">
     color: rgb(0, 0, 0);
-    font-size: 16px;
-    padding: 10px;
+    font-size: 12px;
  qproperty-alignment: AlignCenter;
 border: 1px solid black;</string>
     </property>
     <property name="text">
-     <string/>
+     <string>孙坤坤</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_name_2">
+   <widget class="QLabel" name="label_id_card">
     <property name="geometry">
      <rect>
       <x>820</x>
@@ -467,8 +466,7 @@ border: 1px solid black;</string>
     <property name="styleSheet">
      <string notr="true">
     color: rgb(0, 0, 0);
-    font-size: 16px;
-    padding: 10px;
+    font-size: 12px;
  qproperty-alignment: AlignCenter;
 border: 1px solid black;</string>
     </property>
@@ -536,7 +534,7 @@ border: 1px solid black;</string>
      <string>进入时间:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_name_3">
+   <widget class="QLabel" name="label_time_2">
     <property name="geometry">
      <rect>
       <x>830</x>
@@ -548,8 +546,7 @@ border: 1px solid black;</string>
     <property name="styleSheet">
      <string notr="true">
     color: rgb(0, 0, 0);
-    font-size: 16px;
-    padding: 10px;
+    font-size: 12px;
  qproperty-alignment: AlignCenter;
 border: 1px solid black;</string>
     </property>
@@ -610,7 +607,7 @@ border: 1px solid black;</string>
    <zorder>label_version</zorder>
    <zorder>verticalLayoutWidget</zorder>
    <zorder>label_time</zorder>
-   <zorder>progressBar</zorder>
+   <zorder>progressBar_sim</zorder>
    <zorder>line_2</zorder>
    <zorder>horizontalLayoutWidget</zorder>
    <zorder>label_camera</zorder>
@@ -619,11 +616,11 @@ border: 1px solid black;</string>
    <zorder>pushButton_open_2</zorder>
    <zorder>label</zorder>
    <zorder>label_name</zorder>
-   <zorder>label_name_2</zorder>
+   <zorder>label_id_card</zorder>
    <zorder>label_2</zorder>
    <zorder>label_3</zorder>
    <zorder>label_4</zorder>
-   <zorder>label_name_3</zorder>
+   <zorder>label_time_2</zorder>
    <zorder>label_5</zorder>
    <zorder>frame</zorder>
   </widget>

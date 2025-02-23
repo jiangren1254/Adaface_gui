@@ -149,12 +149,12 @@ class Ui_MainWindow(object):
         self.label_bg2.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
 " color:rgb(0, 255, 0);\n"
 " font-size: 20px; padding: 10px;")
-        self.progressBar = QProgressBar(self.centralwidget)
-        self.progressBar.setObjectName(u"progressBar")
-        self.progressBar.setGeometry(QRect(830, 200, 118, 23))
-        self.progressBar.setValue(88)
-        self.progressBar.setInvertedAppearance(False)
-        self.progressBar.setTextDirection(QProgressBar.TopToBottom)
+        self.progressBar_sim = QProgressBar(self.centralwidget)
+        self.progressBar_sim.setObjectName(u"progressBar_sim")
+        self.progressBar_sim.setGeometry(QRect(830, 200, 118, 23))
+        self.progressBar_sim.setValue(88)
+        self.progressBar_sim.setInvertedAppearance(False)
+        self.progressBar_sim.setTextDirection(QProgressBar.TopToBottom)
         self.line_2 = QFrame(self.centralwidget)
         self.line_2.setObjectName(u"line_2")
         self.line_2.setGeometry(QRect(690, 0, 20, 581))
@@ -212,7 +212,7 @@ class Ui_MainWindow(object):
         self.label_recog_result_2.setStyleSheet(u"border: 2px solid black;")
         self.label = QLabel(self.centralwidget)
         self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(720, 80, 61, 20))
+        self.label.setGeometry(QRect(720, 80, 91, 20))
         self.label.setStyleSheet(u"\n"
 "    color: rgb(0, 0, 0);\n"
 "    font-size: 16px;\n"
@@ -223,17 +223,15 @@ class Ui_MainWindow(object):
         self.label_name.setGeometry(QRect(820, 80, 141, 21))
         self.label_name.setStyleSheet(u"\n"
 "    color: rgb(0, 0, 0);\n"
-"    font-size: 16px;\n"
-"    padding: 10px;\n"
+"    font-size: 12px;\n"
 " qproperty-alignment: AlignCenter;\n"
 "border: 1px solid black;")
-        self.label_name_2 = QLabel(self.centralwidget)
-        self.label_name_2.setObjectName(u"label_name_2")
-        self.label_name_2.setGeometry(QRect(820, 130, 141, 21))
-        self.label_name_2.setStyleSheet(u"\n"
+        self.label_id_card = QLabel(self.centralwidget)
+        self.label_id_card.setObjectName(u"label_id_card")
+        self.label_id_card.setGeometry(QRect(820, 130, 141, 21))
+        self.label_id_card.setStyleSheet(u"\n"
 "    color: rgb(0, 0, 0);\n"
-"    font-size: 16px;\n"
-"    padding: 10px;\n"
+"    font-size: 12px;\n"
 " qproperty-alignment: AlignCenter;\n"
 "border: 1px solid black;")
         self.label_2 = QLabel(self.centralwidget)
@@ -260,13 +258,12 @@ class Ui_MainWindow(object):
 "    font-size: 16px;\n"
 " qproperty-alignment: AlignCenter;\n"
 "border: 1px solid black;")
-        self.label_name_3 = QLabel(self.centralwidget)
-        self.label_name_3.setObjectName(u"label_name_3")
-        self.label_name_3.setGeometry(QRect(830, 280, 141, 21))
-        self.label_name_3.setStyleSheet(u"\n"
+        self.label_time_2 = QLabel(self.centralwidget)
+        self.label_time_2.setObjectName(u"label_time_2")
+        self.label_time_2.setGeometry(QRect(830, 280, 141, 21))
+        self.label_time_2.setStyleSheet(u"\n"
 "    color: rgb(0, 0, 0);\n"
-"    font-size: 16px;\n"
-"    padding: 10px;\n"
+"    font-size: 12px;\n"
 " qproperty-alignment: AlignCenter;\n"
 "border: 1px solid black;")
         self.label_5 = QLabel(self.centralwidget)
@@ -293,7 +290,7 @@ class Ui_MainWindow(object):
         self.label_version.raise_()
         self.verticalLayoutWidget.raise_()
         self.label_time.raise_()
-        self.progressBar.raise_()
+        self.progressBar_sim.raise_()
         self.line_2.raise_()
         self.horizontalLayoutWidget.raise_()
         self.label_camera.raise_()
@@ -302,11 +299,11 @@ class Ui_MainWindow(object):
         self.pushButton_open_2.raise_()
         self.label.raise_()
         self.label_name.raise_()
-        self.label_name_2.raise_()
+        self.label_id_card.raise_()
         self.label_2.raise_()
         self.label_3.raise_()
         self.label_4.raise_()
-        self.label_name_3.raise_()
+        self.label_time_2.raise_()
         self.label_5.raise_()
         self.frame.raise_()
         self.statusbar = QStatusBar(MainWindow)
@@ -331,20 +328,20 @@ class Ui_MainWindow(object):
         self.pushButton_quit.setText(QCoreApplication.translate("MainWindow", u"\u9000\u51fa", None))
         self.label_time.setText(QCoreApplication.translate("MainWindow", u"real time", None))
         self.label_bg2.setText(QCoreApplication.translate("MainWindow", u"\u6444\u50cf\u5934", None))
-        self.progressBar.setFormat(QCoreApplication.translate("MainWindow", u"%p%", None))
+        self.progressBar_sim.setFormat(QCoreApplication.translate("MainWindow", u"%p%", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"\u6253\u5f00", None))
         self.pushButton_close.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed", None))
         self.label_camera.setText("")
         self.label_recog_result.setText("")
         self.pushButton_open_2.setText(QCoreApplication.translate("MainWindow", u"\u8bc6\u522b", None))
         self.label_recog_result_2.setText("")
-        self.label.setText(QCoreApplication.translate("MainWindow", u"\u59d3\u540d:", None))
-        self.label_name.setText("")
-        self.label_name_2.setText("")
+        self.label.setText(QCoreApplication.translate("MainWindow", u"\u59d3     \u540d:", None))
+        self.label_name.setText(QCoreApplication.translate("MainWindow", u"\u5b59\u5764\u5764", None))
+        self.label_id_card.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u8eab\u4efd\u8bc1\u53f7:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u76f8\u4f3c\u5ea6:", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"\u8fdb\u5165\u65f6\u95f4:", None))
-        self.label_name_3.setText("")
+        self.label_time_2.setText("")
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"\u8bc6\u522b\u6307\u793a\u706f:", None))
     # retranslateUi
 

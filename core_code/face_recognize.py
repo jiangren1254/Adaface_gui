@@ -109,16 +109,11 @@ class face_detector:
 
     def get_result_dict(self, img_face_features):
 
-        sum_sim_tensor = torch.sum(
-            torch.einsum("id, jnd->ijn", img_face_features, self.face_features_tensor),
-            dim=-1,
-        )
+        sum_sim_tensor = torch.sum(torch.einsum("id, jnd->ijn", img_face_features, self.face_features_tensor),dim=-1,)
         multi_mask = 1.0 / torch.sum(self.mask, dim=-1)
 
         result_dict = {}
-        max_val, max_indices = torch.max(
-            torch.einsum("ij, j->ij", sum_sim_tensor, multi_mask), dim=1
-        )
+        max_val, max_indices = torch.max(torch.einsum("ij, j->ij", sum_sim_tensor, multi_mask), dim=1)
         for val, indice in zip(max_val.cpu(), max_indices.cpu()):
             result_dict[self.name_list[indice.data.item()]] = val.data.item()
 
@@ -129,7 +124,7 @@ class face_detector:
     def get_detect_results(self, frame_rgb):
         # 这是主函数
         bboxes, aligned_rgb_imgs = align.get_multiple_aligned_faces(frame_rgb)
-        print("得到人脸的数量", len(bboxes))
+        # print("得到人脸的数量", len(bboxes))
         if len(bboxes) == 0:
             # print(f"dected result: bboxes = 0")
             return []
@@ -151,7 +146,7 @@ class face_detector:
 
 
 if __name__ == "__main__":
-    image_path = "./datasets/test/胡歌1.jpg"
+    image_path = "./datasets/test/0.jpg"
     frame = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
     # frame = cv2.imread(image_path)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
