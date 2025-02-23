@@ -54,10 +54,14 @@ tensor([[ 1.0000,  0.7456, -0.0823],
     gui界面是使用pyside6写成的
     ```
 # 运行短视频
+
 <video width="320" height="240" controls>
   <source src="./assets/演示视频.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
+
+
+去./assets/演示视频.mp4下载
 
 
 
