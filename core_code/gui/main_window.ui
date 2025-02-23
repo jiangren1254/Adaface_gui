@@ -250,7 +250,7 @@ font-size: 22px;
      </rect>
     </property>
     <property name="value">
-     <number>88</number>
+     <number>1</number>
     </property>
     <property name="invertedAppearance">
      <bool>false</bool>
@@ -371,18 +371,18 @@ font-size: 22px;
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_open_2">
+   <widget class="QPushButton" name="pushButton_faceFrom_img">
     <property name="geometry">
      <rect>
       <x>600</x>
-      <y>430</y>
-      <width>70</width>
+      <y>440</y>
+      <width>90</width>
       <height>39</height>
      </rect>
     </property>
     <property name="maximumSize">
      <size>
-      <width>70</width>
+      <width>90</width>
       <height>40</height>
      </size>
     </property>
@@ -392,7 +392,7 @@ font-size: 22px;
  font-size: 16px; padding: 10px;</string>
     </property>
     <property name="text">
-     <string>识别</string>
+     <string>识别图片</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_recog_result_2">
@@ -451,7 +451,7 @@ border: 1px solid black;</string>
 border: 1px solid black;</string>
     </property>
     <property name="text">
-     <string>孙坤坤</string>
+     <string>XXX</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_id_card">
@@ -613,7 +613,7 @@ border: 1px solid black;</string>
    <zorder>label_camera</zorder>
    <zorder>label_recog_result</zorder>
    <zorder>line</zorder>
-   <zorder>pushButton_open_2</zorder>
+   <zorder>pushButton_faceFrom_img</zorder>
    <zorder>label</zorder>
    <zorder>label_name</zorder>
    <zorder>label_id_card</zorder>

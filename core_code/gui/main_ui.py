@@ -22,6 +22,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import win32gui
 import win32con
+from datetime import datetime
 
 from PySide6.QtCore import QTimer, Qt, QTime,QDateTime
 from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog,QDialog,QVBoxLayout,QTableWidget,QHBoxLayout,QPushButton,QTableWidgetItem,QLabel
@@ -47,8 +48,39 @@ class FaceDatabase:
                 image BLOB NOT NULL
             )
         ''')
+        # 创建 recognition_logs 表（存储访问记录）
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS recognition_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                id_card TEXT NOT NULL,
+                recognition_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status TEXT CHECK(status IN ('通过', '未通过')) NOT NULL,
+                FOREIGN KEY (id_card) REFERENCES face_data(id_card)
+            )
+        ''')
         conn.commit()
         conn.close()
+    def insert_recognition_log(name, id_card, recognition_time, status):
+        """ 插入识别记录，并手动提供识别时间 """
+        conn = sqlite3.connect("face_database.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("INSERT INTO recognition_logs (name, id_card, recognition_time, status) VALUES (?, ?, ?, ?)", 
+                    (name, id_card, recognition_time, status))
+
+        conn.commit()
+        conn.close()
+    def get_recognition_logs():
+        """ 查询所有识别记录 """
+        conn = sqlite3.connect("face_database.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM recognition_logs ORDER BY recognition_time DESC")
+        logs = cursor.fetchall()
+        
+        conn.close()
+        return logs
     def insert_data(self, name, id_card, frame):
         """ 插入数据：姓名、身份证号、图像 """
         conn = sqlite3.connect(self.db_name)
@@ -119,6 +151,23 @@ class FaceDatabase:
         else:
             print("未找到该身份证号的记录！！")
             return None, None
+    def get_face_data_by_name(self, name):
+        """ 查询数据：根据姓名获取身份证号和图像 """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id_card, image FROM face_data WHERE name=?", (name,))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            id_card, img_bytes = result
+            img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            return id_card, img
+        else:
+            print("未找到该姓名的记录！！")
+            return None, None
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -140,10 +189,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_faceInput.clicked.connect(self.face_input)
         self.pushButton_face_recog.clicked.connect(self.face_recog)
         self.pushButton_database.clicked.connect(self.manage_db)
+        self.pushButton_record.clicked.connect(self.view_record)
         self.pushButton_about.clicked.connect(self.show_about)
         self.pushButton_quit.clicked.connect(self.close_event)
         self.pushButton_open.clicked.connect(self.open_camera)
         self.pushButton_close.clicked.connect(self.close_camera)
+        self.pushButton_faceFrom_img.clicked.connect(self.faceFrom_img)
         # 人脸识别开关
         self.face_recog_switch = False
     def face_input(self):
@@ -320,6 +371,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.db_window.setLayout(layout)
         self.db_window.exec()
 
+    def view_record(self):
+        logs = self.db.get_recognition_logs()
+        for log in logs:
+            print(log)
     def show_about(self):
         """关于按钮"""
         QMessageBox.about(self,"关于",
@@ -337,7 +392,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """更新实时时间"""
         ct=QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
         self.label_time.setText(ct)
-
+    def faceFrom_img(self):
+        default_dir = r"H:\600-副业\千墨科技\01.人脸识别\AdaFace\core_code\datasets\test"
+        img_p,_ = QFileDialog.getOpenFileName(self, "选择人脸图片", default_dir, "Images (*.png *.jpg *.jpeg)")
+        if not img_p:
+            return
+        frame = cv2.imdecode(np.fromfile(img_p, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if frame is None:
+            print("无法加载图片，请检查文件路径或格式")
+            return
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        face_list = self.detector.get_detect_results(frame_rgb)
+        if len(face_list) !=0:
+            self.displayOnGui(face_list)
+        
     def open_camera(self):
         """打开摄像头"""
         if self.cap is None:
@@ -361,13 +429,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             frame_rgb = frame
             face_list = self.detector.get_detect_results(frame_rgb)
             if len(face_list) !=0:
-                print("检测器检测结果", face_list)
-                name, sim,_ = face_list[0]
-                self.label_name.setText(name)
-                # self.label_id_card.setText(id_card)
-                self.progressBar_sim.setValue(int(sim*100+0.5))
-                self.label_time_2.setText(QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))
-                self.frame.setStyleSheet("""QFrame {background-color: green;border-radius: 25px; border: 2px solid black;}""")
+                self.displayOnGui(face_list)
                 self.face_recog_switch = False
                 
         h, w, ch = frame.shape
@@ -388,48 +450,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.face_recog_switch = False
             self.label_camera.clear()
 
-    def draw_boxes_and_names(self, frame, face_list):
-        # boxes_frame = np.copy(frame)
-        for item in face_list:
-            sx1 = int(item[2][0])
-            sy1 = int(item[2][1])
-            sx2 = int(item[2][2])
-            sy2 = int(item[2][3])
-            cv2.rectangle(frame, (sx1, sy1), (sx2, sy2), (0, 255, 0), 2)
-            if int(item[2][1]) > 10:
-                cv2.putText(frame,item[0],(int(sx1), int(sy1 - 6)),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,1.0,(0, 0, 255),)
-            else:
-                cv2.putText(frame,item[0],(int(sx1), int(sy1 + 15)),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,1.0,(0, 0, 255),)
-            # 1.2--将人脸特征库的照片显示出出来---
-            img_dir = os.path.join(self.rootFeatureImg, item[0])
-            img_path = os.path.join(img_dir, "0.jpg")
-            image = cv2.imread(img_path)
-            if image is not None:
-                self.label_recog_result.setPixmap(self.np_to_qpixmap(image))
-        return frame
-
-    def np_to_qpixmap(self, frame):
-        """
-        将OpenCV的frame转换为QPixmap并保持宽高比
-        将 OpenCV 的 BGR 图像转换为 RGB，因为 Qt 使用的是 RGB 色彩空间。
-        """
-        # 将BGR格式转换为RGB格式
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        height, width, channel = frame.shape
-        bytes_per_line = 3 * width
-        q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
-        q_pixmap = QPixmap.fromImage(q_image)
-
-        # 获取 QLabel 的尺寸
-        label_width = self.input.width()
-        label_height = self.input.height()
-
-        # 根据宽高比缩放图像，保持比例并适应 QLabel 的大小
-        scaled_pixmap = q_pixmap.scaled(label_width, label_height, Qt.KeepAspectRatio)
+    def displayOnGui(self,face_list):
+        """在GUI界面显示结果"""
+        print("检测器检测结果", face_list)
+        name, sim,_ = face_list[0]
+        id_card, img = self.db.get_face_data_by_name(name)
         
-        return scaled_pixmap
+        self.db.insert_recognition_log("张三","125874",datetime.now().strftime('%Y-%m-%d %H:%M:%S'),"通过")
+        self.label_name.setText(name)
+        self.label_id_card.setText(id_card)
+        img_h,img_w,img_ch = img.shape
+        q_img = QImage(img.data, img_w, img_h, img_ch*img_w, QImage.Format_RGB888).rgbSwapped()
+        self.label_recog_result.setPixmap(QPixmap.fromImage(q_img).scaled(self.label_recog_result.width(),self.label_recog_result.height(),Qt.KeepAspectRatio))
+        self.progressBar_sim.setValue(int(sim*100+0.5))
+        self.label_time_2.setText(QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))
+        self.frame.setStyleSheet("""QFrame {background-color: green;border-radius: 25px; border: 2px solid black;}""")
     def closeEvent(self, event):
         """在窗口关闭时，自动调用，释放资源"""
         cv2.destroyAllWindows()
