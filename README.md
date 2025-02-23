@@ -1,5 +1,8 @@
 # AdaFace_gui: 基于AdaFace设计的gui界面
-<img src="assets/界面.png"  width="450" style="display: block; margin: auto;"/>
+<img src="assets/主界面.png"  width="450" style="display: block; margin: auto;"/>
+<img src="assets/数据库管理.png"  width="450" style="display: block; margin: auto;"/>
+<img src="assets/识别记录.png"  width="450" style="display: block; margin: auto;"/>
+
 
 ### 1. 去百度网盘下载数据集和预训练模型
 [百度网盘地址]
@@ -51,6 +54,11 @@ tensor([[ 1.0000,  0.7456, -0.0823],
     gui界面是使用pyside6写成的
     ```
 # 运行短视频
+<video width="320" height="240" controls>
+  <source src="./assets/演示视频.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 
 
 
