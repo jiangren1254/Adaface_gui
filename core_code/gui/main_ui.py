@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import win32gui
 import win32con
 
-from PySide6.QtCore import QTimer, Qt, QTime
+from PySide6.QtCore import QTimer, Qt, QTime,QDateTime
 from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog,QDialog,QVBoxLayout,QTableWidget,QHBoxLayout,QPushButton,QTableWidgetItem,QLabel
 from PySide6.QtGui import QPixmap, QImage
 
@@ -289,8 +289,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.close()
     def update_time(self):
         """更新实时时间"""
-        current_time = QTime.currentTime().toString("HH:mm:ss")
-        self.label_time.setText(current_time)
+        ct=QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
+        self.label_time.setText(ct)
 
     def open_camera(self):
         """打开摄像头"""

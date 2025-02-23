@@ -138,7 +138,7 @@ class Ui_MainWindow(object):
 
         self.label_time = QLabel(self.centralwidget)
         self.label_time.setObjectName(u"label_time")
-        self.label_time.setGeometry(QRect(580, 10, 101, 41))
+        self.label_time.setGeometry(QRect(510, 10, 171, 41))
         self.label_time.setStyleSheet(u"background-color: rgb(72, 94, 105);\n"
 " color:rgb(0, 255, 0);\n"
 " font-size: 16px; padding: 10px;\n"
