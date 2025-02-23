@@ -25,7 +25,7 @@ import win32con
 from datetime import datetime
 
 from PySide6.QtCore import QTimer, Qt, QTime,QDateTime
-from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog,QDialog,QVBoxLayout,QTableWidget,QHBoxLayout,QPushButton,QTableWidgetItem,QLabel
+from PySide6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,QInputDialog,QDialog,QVBoxLayout,QTableWidget,QHBoxLayout,QPushButton,QTableWidgetItem,QLabel,QLineEdit
 from PySide6.QtGui import QPixmap, QImage
 
 from main_window_ui import Ui_MainWindow
@@ -53,7 +53,7 @@ class FaceDatabase:
             CREATE TABLE IF NOT EXISTS recognition_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                id_card TEXT NOT NULL,
+                id_card UNIQUE NOT NULL,
                 recognition_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 status TEXT CHECK(status IN ('通过', '未通过')) NOT NULL,
                 FOREIGN KEY (id_card) REFERENCES face_data(id_card)
@@ -61,22 +61,32 @@ class FaceDatabase:
         ''')
         conn.commit()
         conn.close()
-    def insert_recognition_log(name, id_card, recognition_time, status):
-        """ 插入识别记录，并手动提供识别时间 """
+    def insert_recognition_log(self,name, id_card, status):
+        """ 插入识别记录，SQLite 自动填充时间 """
         conn = sqlite3.connect("face_database.db")
         cursor = conn.cursor()
         
-        cursor.execute("INSERT INTO recognition_logs (name, id_card, recognition_time, status) VALUES (?, ?, ?, ?)", 
-                    (name, id_card, recognition_time, status))
+        cursor.execute("INSERT INTO recognition_logs (name, id_card, status) VALUES (?, ?, ?)", 
+                    (name, id_card, status))  # 仅提供3个参数
 
         conn.commit()
         conn.close()
-    def get_recognition_logs():
+    def get_recognition_logs(self):
         """ 查询所有识别记录 """
         conn = sqlite3.connect("face_database.db")
         cursor = conn.cursor()
         
         cursor.execute("SELECT * FROM recognition_logs ORDER BY recognition_time DESC")
+        logs = cursor.fetchall()
+        
+        conn.close()
+        return logs
+    def get_logs_by_name(self,name):
+        """ 根据姓名查询识别记录 """
+        conn = sqlite3.connect("face_database.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM recognition_logs WHERE name=?", (name,))
         logs = cursor.fetchall()
         
         conn.close()
@@ -168,6 +178,88 @@ class FaceDatabase:
         else:
             print("未找到该姓名的记录！！")
             return None, None
+
+
+class RecognitionLogsDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("识别记录")
+        self.setGeometry(200, 200, 600, 400)
+        layout = QVBoxLayout()
+        
+        # 搜索框 + 按钮
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit(self)
+        self.search_input.setPlaceholderText("输入姓名搜索")
+        self.search_button = QPushButton("搜索", self)
+        self.search_button.clicked.connect(self.search_logs) 
+        self.reset_button = QPushButton("重置", self)
+        self.reset_button.clicked.connect(self.load_all_logs) 
+        
+        search_layout.addWidget(self.search_input)
+        search_layout.addWidget(self.search_button)
+        search_layout.addWidget(self.reset_button)
+
+        # 表格控件
+        self.table = QTableWidget(self)
+        self.table.setColumnCount(4) 
+        self.table.setHorizontalHeaderLabels(["姓名", "身份证号", "识别时间", "状态"])
+        self.table.setColumnWidth(0, 100) 
+        self.table.setColumnWidth(1, 180) 
+        self.table.setColumnWidth(2, 150) 
+        self.table.setColumnWidth(3, 80) 
+
+
+        # 加入布局
+        layout.addLayout(search_layout)
+        layout.addWidget(self.table)
+
+        self.setLayout(layout)
+
+        self.load_all_logs()
+
+    def get_recognition_logs(self):
+        """ 查询所有识别记录 """
+        conn = sqlite3.connect("face_database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM recognition_logs ORDER BY recognition_time DESC")
+        logs = cursor.fetchall()
+        conn.close()
+        return logs
+
+    def get_logs_by_name(self, name):
+        """ 根据姓名查询识别记录 """
+        conn = sqlite3.connect("face_database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM recognition_logs WHERE name=?", (name,))
+        logs = cursor.fetchall()
+        conn.close()
+        return logs
+
+    def load_all_logs(self):
+        """ 加载所有识别记录 """
+        logs = self.get_recognition_logs()
+        # print(logs)
+        self.update_table(logs)
+
+    def search_logs(self):
+        """ 根据姓名搜索识别记录 """
+        name = self.search_input.text().strip()
+        if name:
+            logs = self.get_logs_by_name(name)
+            self.update_table(logs)
+
+    def update_table(self, logs):
+        """ 更新表格数据 """
+        self.table.setRowCount(len(logs))  # 设置行数
+
+        for row_idx, (_,name, id_card, recognition_time, status) in enumerate(logs):
+            # print("row_idx",row_idx)
+            self.table.setItem(row_idx, 0, QTableWidgetItem(name))
+            self.table.setItem(row_idx, 1, QTableWidgetItem(id_card))
+            self.table.setItem(row_idx, 2, QTableWidgetItem(recognition_time))
+            self.table.setItem(row_idx, 3, QTableWidgetItem(status))
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -372,9 +464,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.db_window.exec()
 
     def view_record(self):
-        logs = self.db.get_recognition_logs()
-        for log in logs:
-            print(log)
+        """ 打开识别记录窗口 """
+        self.record_dialog = RecognitionLogsDialog(self)
+        self.record_dialog.exec()
     def show_about(self):
         """关于按钮"""
         QMessageBox.about(self,"关于",
@@ -452,11 +544,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def displayOnGui(self,face_list):
         """在GUI界面显示结果"""
-        print("检测器检测结果", face_list)
+        # print("检测器检测结果", face_list)
         name, sim,_ = face_list[0]
         id_card, img = self.db.get_face_data_by_name(name)
-        
-        self.db.insert_recognition_log("张三","125874",datetime.now().strftime('%Y-%m-%d %H:%M:%S'),"通过")
+        self.db.insert_recognition_log(name,id_card,"通过")
         self.label_name.setText(name)
         self.label_id_card.setText(id_card)
         img_h,img_w,img_ch = img.shape
